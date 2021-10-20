@@ -44,6 +44,7 @@ if __name__ == '__main__':
     folder = "h5"
     boxes_label, cls_label, image_feature, instance_feature, boxes_pred, cls_preds = CorrectionDataset(folder)[0]
     net = CorrectionNet(class_num=1)
-    output = net(image_feature, instance_feature, cls_preds, boxes_pred)
+    output = net(image_feature.unsqueeze(dim=0), instance_feature.unsqueeze(dim=0), cls_preds.unsqueeze(dim=0),
+                 boxes_pred.unsqueeze(dim=0))
     print(output)
 
