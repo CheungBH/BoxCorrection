@@ -26,11 +26,12 @@ class CorrectionNet(nn.Module):
         )
 
     def forward(self, image_feature, instance_feature, class_possibility, box_reg):
+        bs = image_feature.size(0)
         cls = self.cls_embedding(class_possibility)
         box = self.box_embedding(box_reg)
 
-        img = self.image_pooling(self.image_project(image_feature)).view(1,-1)
-        instance = self.instance_pooling(self.instance_project(instance_feature)).view(1,-1)
+        img = self.image_pooling(self.image_project(image_feature)).view(bs, -1)
+        instance = self.instance_pooling(self.instance_project(instance_feature)).view(bs, -1)
 
         feat = torch.cat([img, instance, cls, box], dim=-1)
 
@@ -41,8 +42,8 @@ class CorrectionNet(nn.Module):
 if __name__ == '__main__':
     from correction_loader import CorrectionDataset
     folder = "h5"
-    boxes_label, cls_label, image_feature, instance_feature, cls_preds, boxes_preds = CorrectionDataset(folder)[0]
+    boxes_label, cls_label, image_feature, instance_feature, boxes_pred, cls_preds = CorrectionDataset(folder)[0]
     net = CorrectionNet(class_num=1)
-    output = net(image_feature, instance_feature[0].unsqueeze(dim=0), cls_preds[0].unsqueeze(dim=0), boxes_preds[0].unsqueeze(dim=0))
+    output = net(image_feature, instance_feature, cls_preds, boxes_pred)
     print(output)
 
