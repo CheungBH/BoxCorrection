@@ -33,16 +33,18 @@ if device != "cpu":
 for epoch in range(epochs):
     net.train()
     print("Processing epoch {}".format(epoch))
+    loss_sum = torch.zeros(1)
+    if device != "cpu":
+        loss_sum = loss_sum.cuda()
+
     for i, data in enumerate(loader):
         boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds = data
         output = net(image_feature, instance_feature, cls_preds, boxes_preds)
         cls_loss = cls_crit(output[:, :2], cls_label.long())
         b_weight = generate_box_weight(cls_label)
         reg_loss = _smooth_l1_loss(output[:, 2:], boxes_label, b_weight, b_weight)
-        # print(crit_loss)
-
         loss = cls_loss + reg_loss
-        print(loss)
+        loss_sum += loss
 
         if mix_precision:
             with amp.scale_loss(loss, optimizer) as scaled_loss:
@@ -51,5 +53,6 @@ for epoch in range(epochs):
             loss.backward()
         optimizer.step()
 
+    print("Average loss is {}".format((loss_sum/len(loader)).tolist()))
     torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
