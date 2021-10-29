@@ -25,6 +25,10 @@ parser.add_argument('--LR', default=2E-7, type=float,
                     help='Learning rate')
 parser.add_argument('--optMethod', default='adam', type=str,
                     help='Optimization method: rmsprop | sgd | nag | adadelta')
+parser.add_argument('--schedule', default='step', type=str,
+                    help='Schedule method: rmsprop | sgd | nag | adadelta')
+parser.add_argument('--momentum', default=2E-7, type=float,
+                    help='Learning rate')
 
 "----------------------------- Training options -----------------------------"
 parser.add_argument('--epochs', default=120, type=int,

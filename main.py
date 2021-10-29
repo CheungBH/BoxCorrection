@@ -9,6 +9,7 @@ from utils import generate_box_weight, _smooth_l1_loss
 import time
 from opt import opt
 from logger import BatchLogger
+from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR
 
 try:
     from apex import amp
@@ -25,6 +26,8 @@ optimize = opt.optMethod
 balance_ratio = opt.balance_ratio
 os.makedirs(model_dir, exist_ok=True)
 batch_size = opt.batch_size
+schedule = opt.schedule
+momentum = opt.momentum
 
 cls_crit = F.cross_entropy
 
@@ -37,11 +40,20 @@ if device != "cpu":
 if optimize == "adam":
     optimizer = optim.Adam(net.parameters(), lr=LR)
 elif optimize == "sgd":
-    optimizer = optim.SGD(net.parameters(), lr=LR)
+    optimizer = optim.SGD(net.parameters(), lr=LR, momentum=momentum)
 elif optimize == "rmsprop":
-    optimizer = optim.RMSprop(net.parameters(), lr=LR)
+    optimizer = optim.RMSprop(net.parameters(), lr=LR, momentum=momentum)
 else:
-    raise NotImplementedError("Current optimizer doesn't support")
+    raise NotImplementedError("The optimizer is not supported")
+
+if schedule == "step":
+    scheduler = MultiStepLR(optimizer, milestones=[int(epochs*0.7), int(epochs*0.9)], gamma=0.1)
+elif schedule == "exp":
+    scheduler = ExponentialLR(optimizer, gamma=0.999)
+elif schedule == "stable":
+    scheduler = None
+else:
+    raise NotImplementedError("The scheduler is not supported")
 
 if mix_precision:
     net, optimizer = amp.initialize(net, optimizer, opt_level="O1")
@@ -80,6 +92,11 @@ for epoch in range(epochs):
         else:
             loss.backward()
         optimizer.step()
+        if schedule == "exp":
+            scheduler.step()
+
+    if schedule == "step":
+        scheduler.step()
 
     ave_loss = (loss_sum/len(loader)).tolist()[0]
     opt.start_epoch = epoch
@@ -89,7 +106,8 @@ for epoch in range(epochs):
         torch.save(net.state_dict(), os.path.join(model_dir, "best.pth".format(epoch)))
 
     torch.save(opt, cfg_pkl)
-    print("The Average loss of epoch {} is {}, using {} s".format(epoch, ave_loss, round(time.time() - begin_time), 2))
+    print("The Average loss of epoch {} is {}, using {}s. Current lr is {}".format(
+        epoch, ave_loss, round(time.time() - begin_time), 2), optimizer.param_groups[0]['lr'])
     log.write("Epoch {}: Loss {}\n".format(epoch, ave_loss))
 
     if epoch % opt.save_interval == 0:
