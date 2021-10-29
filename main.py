@@ -111,4 +111,4 @@ for epoch in range(epochs):
     if epoch % opt.save_interval == 0:
         torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
-batch_logger.write_results(batch_size, optimize, LR, epochs, balance_ratio, best_loss)
+batch_logger.write_results(batch_size, optimize, LR, epochs, balance_ratio, schedule, momentum, best_loss)
