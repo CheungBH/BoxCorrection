@@ -37,7 +37,7 @@ parser.add_argument('--iterations', default=0, type=int,
                     help='Total train iters')
 parser.add_argument('--num_worker', default=5, type=int,
                     help='num worker of train')
-parser.add_argument('--save_interval', default=2, type=int,
+parser.add_argument('--save_interval', default=10, type=int,
                     help='interval')
 parser.add_argument('--device', default="cuda", type=str,
                     help='interval')

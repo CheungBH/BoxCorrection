@@ -89,6 +89,8 @@ for epoch in range(epochs):
     torch.save(opt, cfg_pkl)
     print("The Average loss of epoch {} is {}, using {} s".format(epoch, ave_loss, round(time.time() - begin_time), 2))
     log.write("Epoch {}: Loss {}\n".format(epoch, ave_loss))
-    torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
+
+    if epoch % opt.save_interval == 0:
+        torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
 batch_logger.write_results(batch_size, optimize, LR, epochs, balance_ratio, best_loss)

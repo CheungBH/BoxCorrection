@@ -4,3 +4,6 @@ __pycache__/
 h5.zip
 h5/
 auto_training.py
+train_log.log
+weights
+

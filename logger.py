@@ -3,8 +3,8 @@ import os
 
 class BatchLogger:
     def __init__(self, folder):
-        excel_path = os.path.join(folder, "train_result.csv")
-        if os.path.exists(excel_path):
+        excel_path = os.path.join("/".join(folder.split("/")[:-1]), "train_result.csv")
+        if not os.path.exists(excel_path):
             self.file = open(excel_path, "w")
             self.write_title()
         else:
