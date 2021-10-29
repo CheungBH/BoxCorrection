@@ -1,5 +1,5 @@
 #-*-coding:utf-8-*-
-excel_path = "auto/pretrain_13kps/mixed.csv"
+excel_path = "auto/balance_sample/ratio3.csv"
 excel_path = excel_path.replace("\\", "/")
 
 task_folder = excel_path.split("/")[-2]

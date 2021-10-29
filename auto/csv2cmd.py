@@ -2,7 +2,7 @@ import csv    #加载csv包便于读取csv文件
 import os
 from auto.config import task_folder, excel_name, base_name
 
-include_cuda = True
+include_cuda = False
 negative = ["False", "FALSE", "false"]
 positive = ["True", "TRUE", "true"]
 
@@ -17,9 +17,9 @@ def csvTransform(file):
     opt = [item for item in data[0]]
 
     if include_cuda:
-        begin = "'CUDA_VISIBLE_DEVICES= python auto_trainer.py "
+        begin = "'CUDA_VISIBLE_DEVICES= python main.py "
     else:
-        begin = "'python auto_trainer.py "
+        begin = "'python main.py "
 
     cmds = []
     for idx, mdl in enumerate(data[1:]):
@@ -43,7 +43,7 @@ def csvTransform(file):
 
         tmp += "--expFolder {}-{} ".format(task_folder, base_name)
         tmp += "--expID {}".format(idx+1)
-        cmd = begin + tmp + "'\n"
+        cmd = begin + tmp + "',\n"
         if valid:
             cmds.append(cmd)
         else:
