@@ -107,7 +107,7 @@ for epoch in range(epochs):
 
     torch.save(opt, cfg_pkl)
     print("The Average loss of epoch {} is {}, using {}s. Current lr is {}".format(
-        epoch, ave_loss, round(time.time() - begin_time), 2), optimizer.param_groups[0]['lr'])
+        epoch, ave_loss, round((time.time() - begin_time), 2), optimizer.param_groups[0]['lr']))
     log.write("Epoch {}: Loss {}\n".format(epoch, ave_loss))
 
     if epoch % opt.save_interval == 0:
