@@ -21,9 +21,9 @@ parser.add_argument('--resume', action='store_true',
 
 "----------------------------- Hyperparameter options -----------------------------"
 
-parser.add_argument('--LR', default=1e-3, type=float,
+parser.add_argument('--LR', default=2E-7, type=float,
                     help='Learning rate')
-parser.add_argument('--optMethod', default='rmsprop', type=str,
+parser.add_argument('--optMethod', default='adam', type=str,
                     help='Optimization method: rmsprop | sgd | nag | adadelta')
 
 "----------------------------- Training options -----------------------------"
@@ -31,15 +31,15 @@ parser.add_argument('--nEpochs', default=120, type=int,
                     help='Number of hourglasses to stack')
 parser.add_argument('--start_epoch', default=0, type=int,
                     help='Current epoch')
-parser.add_argument('--batch-size', default=2, type=int,
+parser.add_argument('--batch_size', default=2, type=int,
                     help='Train-batch size')
-parser.add_argument('--trainIters', default=0, type=int,
+parser.add_argument('--iterations', default=0, type=int,
                     help='Total train iters')
-parser.add_argument('--valIters', default=0, type=int,
-                    help='Total valid iters')
 parser.add_argument('--num_worker', default=5, type=int,
                     help='num worker of train')
 parser.add_argument('--save_interval', default=2, type=int,
+                    help='interval')
+parser.add_argument('--device', default="cuda", type=str,
                     help='interval')
 
 opt, _ = parser.parse_known_args()

@@ -7,6 +7,7 @@ import torch
 import os
 from utils import generate_box_weight, _smooth_l1_loss
 import time
+from opt import opt
 
 try:
     from apex import amp
@@ -14,19 +15,21 @@ try:
 except:
     mix_precision = False
 
-epochs = 200
-dataset_path = "h5"
-LR = 0.0000002
-device = "cpu"
-model_dir = "2E-7_adam_balance_200epo"
-optimize = "adam"
-balance_ratio = 3
+epochs = opt.nEpochs
+dataset_path = opt.dataset_root
+LR = opt.LR
+device = opt.device
+model_dir = os.path.join("weights", opt.expFolder, opt.expID,)
+optimize = opt.optMethod
+balance_ratio = opt.balance_ratio
 os.makedirs(model_dir, exist_ok=True)
 
 cls_crit = F.cross_entropy
 
-net = CorrectionNet(1)
-loader = Dataloader(dataset_path, balance_ratio).build_loader(batch_size=2, num_worker=0)
+dataset = Dataloader(dataset_path, balance_ratio)
+loader = dataset.build_loader(batch_size=opt.batch_size, num_worker=opt.num_worker)
+net = CorrectionNet(dataset.num_class)
+
 if optimize == "adam":
     optimizer = optim.Adam(net.parameters(), lr=LR)
 elif optimize == "sgd":

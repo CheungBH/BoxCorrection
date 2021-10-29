@@ -29,6 +29,7 @@ class CorrectionDataset(Dataset):
         self.cls_label = tensor(self.merge_sample(self.cls_label))
         self.boxes_label = tensor(self.merge_sample(self.boxes_label))
         self.balance_ratio = balance_ratio
+        self.num_class = self.cls_pred.size()[1] - 1
         if balance_ratio:
             self.sample_balance()
 
@@ -71,6 +72,7 @@ class CorrectionDataset(Dataset):
 class Dataloader:
     def __init__(self, h5_folders, balance_ratio=0):
         self.dataset = CorrectionDataset(h5_folders, balance_ratio=balance_ratio)
+        self.num_class = self.dataset.num_class
 
     def build_loader(self, shuffle=False, batch_size=1, num_worker=1, pin_memory=True):
         return torch.utils.data.DataLoader(self.dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_worker,
