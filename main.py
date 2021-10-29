@@ -12,7 +12,7 @@ from logger import BatchLogger
 
 try:
     from apex import amp
-    mix_precision = True
+    mix_precision = False
 except:
     mix_precision = False
 
@@ -31,6 +31,8 @@ cls_crit = F.cross_entropy
 dataset = Dataloader(dataset_path, balance_ratio)
 loader = dataset.build_loader(batch_size=batch_size, num_worker=opt.num_worker)
 net = CorrectionNet(dataset.num_class)
+if device != "cpu":
+    net.cuda()
 
 if optimize == "adam":
     optimizer = optim.Adam(net.parameters(), lr=LR)
@@ -47,8 +49,7 @@ best_loss = float("inf")
 batch_logger = BatchLogger(model_dir)
 cfg_pkl = os.path.join(model_dir, "cfg.pkl")
 
-if device != "cpu":
-    net.cuda()
+
 net.train()
 
 for epoch in range(epochs):
