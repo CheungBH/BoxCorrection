@@ -49,7 +49,7 @@ else:
 if schedule == "step":
     scheduler = MultiStepLR(optimizer, milestones=[int(epochs*0.7), int(epochs*0.9)], gamma=0.1)
 elif schedule == "exp":
-    scheduler = ExponentialLR(optimizer, gamma=0.999)
+    scheduler = ExponentialLR(optimizer, gamma=0.9999)
 elif schedule == "stable":
     scheduler = None
 else:
