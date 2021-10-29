@@ -33,8 +33,12 @@ class CorrectionNet(nn.Module):
         cls = self.cls_embedding(class_possibility)
         box = self.box_embedding(box_reg)
 
-        img = self.image_pooling(self.relu(self.image_BN(self.image_project(image_feature)))).view(bs, -1)
-        instance = self.instance_pooling(self.relu(self.instance_BN(self.instance_project(instance_feature)))).view(bs, -1)
+        # img = self.image_pooling(self.relu(self.image_BN(self.image_project(image_feature)))).view(bs, -1)
+        # instance = self.instance_pooling(self.relu(self.instance_BN(self.instance_project(instance_feature)))).view(bs, -1)
+
+        img = self.image_pooling(self.image_project(image_feature)).view(bs, -1)
+        instance = self.instance_pooling(self.instance_project(instance_feature)).view(bs, -1)
+
 
         feat = torch.cat([img, instance, cls, box], dim=-1)
 

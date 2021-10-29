@@ -9,22 +9,26 @@ from utils import generate_box_weight, _smooth_l1_loss
 
 try:
     from apex import amp
-    mix_precision = True
+    mix_precision = False
 except:
     mix_precision = False
 
 epochs = 20
 dataset_path = "h5"
 LR = 0.0000005
-device = "cpu"
-model_dir = "5E-7_BN"
+device = "cuda:0"
+model_dir = "5E-7_sgd"
+optimize = "sgd"
 os.makedirs(model_dir, exist_ok=True)
 
 cls_crit = F.cross_entropy
 
 net = CorrectionNet(1)
 loader = Dataloader(dataset_path).build_loader(batch_size=2, num_worker=0)
-optimizer = optim.Adam(net.parameters(), lr=LR)
+if optimize == "adam":
+    optimizer = optim.Adam(net.parameters(), lr=LR)
+elif optimize == "sgd":
+    optimizer = optim.SGD(net.parameters(), lr=LR)
 iteration = 0
 log = open(os.path.join(model_dir, "log.txt"), "w")
 
@@ -42,7 +46,9 @@ for epoch in range(epochs):
     for i, data in enumerate(loader):
         iteration += 1
         boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds = data
-        output = net(image_feature, instance_feature, cls_preds, boxes_preds)
+        output = net(image_feature.cuda(), instance_feature.cuda(), cls_preds.cuda(), boxes_preds.cuda())
+        if device != "cpu":
+            output = output.cpu()
         cls_loss = cls_crit(output[:, :2], cls_label.long())
         b_weight = generate_box_weight(cls_label)
         reg_loss = _smooth_l1_loss(output[:, 2:], boxes_label, b_weight, b_weight)
@@ -58,6 +64,6 @@ for epoch in range(epochs):
 
     ave_loss = (loss_sum/len(loader)).tolist()[0]
     print("Average loss is {}".format(ave_loss))
-    log.write("Epoch {}: Loss {}".format(epoch, ave_loss))
+    log.write("Epoch {}: Loss {}\n".format(epoch, ave_loss))
     torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
