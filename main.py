@@ -38,6 +38,8 @@ if optimize == "adam":
     optimizer = optim.Adam(net.parameters(), lr=LR)
 elif optimize == "sgd":
     optimizer = optim.SGD(net.parameters(), lr=LR)
+elif optimize == "rmsprop":
+    optimizer = optim.RMSprop(net.parameters(), lr=LR)
 else:
     raise NotImplementedError("Current optimizer doesn't support")
 
