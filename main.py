@@ -92,10 +92,8 @@ for epoch in range(epochs):
         else:
             loss.backward()
         optimizer.step()
-        if schedule == "exp":
-            scheduler.step()
 
-    if schedule == "step":
+    if schedule != "stable":
         scheduler.step()
 
     ave_loss = (loss_sum/len(loader)).tolist()[0]
