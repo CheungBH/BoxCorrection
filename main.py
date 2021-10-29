@@ -16,15 +16,16 @@ except:
 epochs = 20
 dataset_path = "h5"
 LR = 0.0000005
-device = "cuda:0"
-model_dir = "5E-7_sgd"
+device = "cpu"
+model_dir = "5E-7_sgd_balance"
 optimize = "sgd"
+balance_ratio = 3
 os.makedirs(model_dir, exist_ok=True)
 
 cls_crit = F.cross_entropy
 
 net = CorrectionNet(1)
-loader = Dataloader(dataset_path).build_loader(batch_size=2, num_worker=0)
+loader = Dataloader(dataset_path, balance_ratio).build_loader(batch_size=2, num_worker=0)
 if optimize == "adam":
     optimizer = optim.Adam(net.parameters(), lr=LR)
 elif optimize == "sgd":
@@ -46,9 +47,11 @@ for epoch in range(epochs):
     for i, data in enumerate(loader):
         iteration += 1
         boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds = data
-        output = net(image_feature.cuda(), instance_feature.cuda(), cls_preds.cuda(), boxes_preds.cuda())
         if device != "cpu":
-            output = output.cpu()
+            output = net(image_feature.cuda(), instance_feature.cuda(), cls_preds.cuda(), boxes_preds.cuda()).cpu()
+        else:
+            output = net(image_feature, instance_feature, cls_preds, boxes_preds)
+
         cls_loss = cls_crit(output[:, :2], cls_label.long())
         b_weight = generate_box_weight(cls_label)
         reg_loss = _smooth_l1_loss(output[:, 2:], boxes_label, b_weight, b_weight)

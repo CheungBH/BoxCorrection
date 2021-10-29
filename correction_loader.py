@@ -3,12 +3,13 @@ import os
 from torch.utils.data import Dataset
 import torch
 import numpy as np
+import random
 
 tensor = torch.Tensor
 
 
 class CorrectionDataset(Dataset):
-    def __init__(self, h5_folders, device="cpu"):
+    def __init__(self, h5_folders, device="cpu", balance_ratio=0):
         self.files = [os.path.join(h5_folders, file_name) for file_name in os.listdir(h5_folders)]
         self.device = device
         self.boxes_pred, self.cls_pred, self.instance_feature, self.cls_label, self.boxes_label, self.idx = \
@@ -28,6 +29,24 @@ class CorrectionDataset(Dataset):
         self.instance_feature = tensor(self.merge_sample(self.instance_feature))
         self.cls_label = tensor(self.merge_sample(self.cls_label))
         self.boxes_label = tensor(self.merge_sample(self.boxes_label))
+        self.balance_ratio = balance_ratio
+        if balance_ratio:
+            self.sample_balance()
+
+    def sample_balance(self):
+        pos_sample = int(self.cls_label.sum())
+        neg_sample = pos_sample * self.balance_ratio
+        if pos_sample + neg_sample > len(self):
+            return
+        # sorted_idx = self.cls_label.sort()[1]
+        pos_idx, neg_idx = torch.nonzero(self.cls_label > 0).view(-1), torch.nonzero(self.cls_label == 0).view(-1)
+        selected_idx = random.sample(neg_idx.tolist(), neg_sample) + pos_idx.tolist()
+        self.boxes_pred = self.boxes_pred[selected_idx]
+        self.cls_pred = self.cls_pred[selected_idx]
+        self.instance_feature = self.instance_feature[selected_idx]
+        self.cls_label = self.cls_label[selected_idx]
+        self.boxes_label = self.boxes_label[selected_idx]
+        self.idx = torch.Tensor(self.idx)[selected_idx].tolist()
 
     @staticmethod
     def merge_sample(item):
@@ -55,8 +74,8 @@ class CorrectionDataset(Dataset):
 
 
 class Dataloader:
-    def __init__(self, h5_folders):
-        self.dataset = CorrectionDataset(h5_folders)
+    def __init__(self, h5_folders, balance_ratio=0):
+        self.dataset = CorrectionDataset(h5_folders, balance_ratio=balance_ratio)
 
     def build_loader(self, shuffle=False, batch_size=1, num_worker=1, pin_memory=True):
         return torch.utils.data.DataLoader(self.dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_worker,
