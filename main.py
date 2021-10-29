@@ -14,12 +14,12 @@ try:
 except:
     mix_precision = False
 
-epochs = 20
+epochs = 200
 dataset_path = "h5"
-LR = 0.0000005
+LR = 0.0000002
 device = "cpu"
-model_dir = "5E-7_sgd_balance"
-optimize = "sgd"
+model_dir = "2E-7_adam_balance_200epo"
+optimize = "adam"
 balance_ratio = 3
 os.makedirs(model_dir, exist_ok=True)
 

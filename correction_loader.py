@@ -9,9 +9,8 @@ tensor = torch.Tensor
 
 
 class CorrectionDataset(Dataset):
-    def __init__(self, h5_folders, device="cpu", balance_ratio=0):
+    def __init__(self, h5_folders, balance_ratio=0):
         self.files = [os.path.join(h5_folders, file_name) for file_name in os.listdir(h5_folders)]
-        self.device = device
         self.boxes_pred, self.cls_pred, self.instance_feature, self.cls_label, self.boxes_label, self.idx = \
             [], [], [], [], [], []
         self.image_feature = {}
@@ -63,11 +62,7 @@ class CorrectionDataset(Dataset):
         instance_feature = self.instance_feature[item]
         cls_preds = self.cls_pred[item]
         boxes_preds = self.boxes_pred[item]
-        if self.device == "cpu":
-            return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds
-        else:
-            return boxes_label.cuda(), cls_label.cuda(), image_feature.cuda(), instance_feature.cuda(), \
-                   boxes_preds.cuda(), cls_preds.cuda()
+        return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds
 
     def __len__(self):
         return len(self.idx)
