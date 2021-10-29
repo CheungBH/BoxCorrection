@@ -6,6 +6,7 @@ import torch.optim as optim
 import torch
 import os
 from utils import generate_box_weight, _smooth_l1_loss
+import time
 
 try:
     from apex import amp
@@ -36,11 +37,11 @@ log = open(os.path.join(model_dir, "log.txt"), "w")
 
 if device != "cpu":
     net.cuda()
+net.train()
 
 for epoch in range(epochs):
-    net.train()
-    print("Processing epoch {}".format(epoch))
     loss_sum = torch.zeros(1)
+    begin_time = time.time()
     if device != "cpu":
         loss_sum = loss_sum.cuda()
 
@@ -66,7 +67,7 @@ for epoch in range(epochs):
         optimizer.step()
 
     ave_loss = (loss_sum/len(loader)).tolist()[0]
-    print("Average loss is {}".format(ave_loss))
+    print("The Average loss of epoch {} is {}, using {} s".format(epoch, ave_loss, round(time.time() - begin_time), 2))
     log.write("Epoch {}: Loss {}\n".format(epoch, ave_loss))
     torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
