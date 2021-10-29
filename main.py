@@ -12,7 +12,7 @@ from logger import BatchLogger
 
 try:
     from apex import amp
-    mix_precision = False
+    mix_precision = True
 except:
     mix_precision = False
 
@@ -36,7 +36,12 @@ if optimize == "adam":
     optimizer = optim.Adam(net.parameters(), lr=LR)
 elif optimize == "sgd":
     optimizer = optim.SGD(net.parameters(), lr=LR)
-iteration = 0
+else:
+    raise NotImplementedError("Current optimizer doesn't support")
+
+if mix_precision:
+    net, optimizer = amp.initialize(net, optimizer, opt_level="O1")
+
 log = open(os.path.join(model_dir, "log.txt"), "w")
 best_loss = float("inf")
 batch_logger = BatchLogger(model_dir)
