@@ -8,6 +8,7 @@ import os
 from utils import generate_box_weight, _smooth_l1_loss
 import time
 from opt import opt
+from logger import BatchLogger
 
 try:
     from apex import amp
@@ -15,7 +16,7 @@ try:
 except:
     mix_precision = False
 
-epochs = opt.nEpochs
+epochs = opt.epochs
 dataset_path = opt.dataset_root
 LR = opt.LR
 device = opt.device
@@ -23,11 +24,12 @@ model_dir = os.path.join("weights", opt.expFolder, opt.expID,)
 optimize = opt.optMethod
 balance_ratio = opt.balance_ratio
 os.makedirs(model_dir, exist_ok=True)
+batch_size = opt.batch_size
 
 cls_crit = F.cross_entropy
 
 dataset = Dataloader(dataset_path, balance_ratio)
-loader = dataset.build_loader(batch_size=opt.batch_size, num_worker=opt.num_worker)
+loader = dataset.build_loader(batch_size=batch_size, num_worker=opt.num_worker)
 net = CorrectionNet(dataset.num_class)
 
 if optimize == "adam":
@@ -36,7 +38,9 @@ elif optimize == "sgd":
     optimizer = optim.SGD(net.parameters(), lr=LR)
 iteration = 0
 log = open(os.path.join(model_dir, "log.txt"), "w")
-
+best_loss = float("inf")
+batch_logger = BatchLogger(model_dir)
+cfg_pkl = os.path.join(model_dir, "cfg.pkl")
 
 if device != "cpu":
     net.cuda()
@@ -49,7 +53,7 @@ for epoch in range(epochs):
         loss_sum = loss_sum.cuda()
 
     for i, data in enumerate(loader):
-        iteration += 1
+        opt.iterations += 1
         boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds = data
         if device != "cpu":
             output = net(image_feature.cuda(), instance_feature.cuda(), cls_preds.cuda(), boxes_preds.cuda()).cpu()
@@ -70,7 +74,15 @@ for epoch in range(epochs):
         optimizer.step()
 
     ave_loss = (loss_sum/len(loader)).tolist()[0]
+    opt.start_epoch = epoch
+    if ave_loss < best_loss:
+        best_loss = ave_loss
+        opt.loss = best_loss
+        torch.save(net.state_dict(), os.path.join(model_dir, "best.pth".format(epoch)))
+
+    torch.save(opt, cfg_pkl)
     print("The Average loss of epoch {} is {}, using {} s".format(epoch, ave_loss, round(time.time() - begin_time), 2))
     log.write("Epoch {}: Loss {}\n".format(epoch, ave_loss))
     torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
+batch_logger.write_results(batch_size, optimize, LR, epochs, balance_ratio, best_loss)

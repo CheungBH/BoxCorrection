@@ -27,7 +27,7 @@ parser.add_argument('--optMethod', default='adam', type=str,
                     help='Optimization method: rmsprop | sgd | nag | adadelta')
 
 "----------------------------- Training options -----------------------------"
-parser.add_argument('--nEpochs', default=120, type=int,
+parser.add_argument('--epochs', default=120, type=int,
                     help='Number of hourglasses to stack')
 parser.add_argument('--start_epoch', default=0, type=int,
                     help='Current epoch')
