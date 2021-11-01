@@ -82,8 +82,8 @@ class Dataloader:
 if __name__ == '__main__':
     # CD = CorrectionDataset("h5")
     # print(CD[0])
-    h5_folder = "h5"
-    loader = Dataloader(h5_folder).build_loader()
+    h5_folder = "h5/fake_sim10k"
+    loader = Dataloader(h5_folder).build_loader(num_worker=0)
     for idx, (boxes_label, cls_label, image_feature, instance_feature, cls_preds, boxes_preds) in enumerate(loader):
         print(idx)
 

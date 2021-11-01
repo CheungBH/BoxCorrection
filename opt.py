@@ -9,7 +9,7 @@ parser.add_argument('--expFolder', default='test', type=str,
                     help='Experiment folder')
 
 "----------------------------- Data options ------------------------------"
-parser.add_argument('--dataset_root', default='h5', type=str,
+parser.add_argument('--dataset_root', default='h5/fake_sim10k', type=str,
                     help='Experiment ID')
 parser.add_argument('--balance_ratio', default=0, type=int, help="The ratio of neg: pos sample")
 
