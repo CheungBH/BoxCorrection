@@ -28,6 +28,7 @@ os.makedirs(model_dir, exist_ok=True)
 batch_size = opt.batch_size
 schedule = opt.schedule
 momentum = opt.momentum
+max_loss = 99
 
 cls_crit = F.cross_entropy
 
@@ -102,6 +103,10 @@ for epoch in range(epochs):
         best_loss = ave_loss
         opt.loss = best_loss
         torch.save(net.state_dict(), os.path.join(model_dir, "best.pth".format(epoch)))
+
+    if ave_loss > max_loss:
+        best_loss = ave_loss
+        break
 
     torch.save(opt, cfg_pkl)
     print("The Average loss of epoch {} is {}, using {}s. Current lr is {}".format(
