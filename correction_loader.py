@@ -55,7 +55,7 @@ class CorrectionDataset(Dataset):
             temp = np.concatenate((temp, i))
         return temp
 
-    def __getitem__(self, item):
+    def __getitem__(self, item, return_name=True):
         idx = self.idx[item]
         boxes_label = self.boxes_label[item]
         cls_label = self.cls_label[item]
@@ -63,7 +63,11 @@ class CorrectionDataset(Dataset):
         instance_feature = self.instance_feature[item]
         cls_preds = self.cls_pred[item]
         boxes_preds = self.boxes_pred[item]
-        return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds
+        if not return_name:
+            return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds
+        else:
+            return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, \
+                   self.files[idx].split("/")[-1]
 
     def __len__(self):
         return len(self.idx)
@@ -82,9 +86,9 @@ class Dataloader:
 if __name__ == '__main__':
     # CD = CorrectionDataset("h5")
     # print(CD[0])
-    h5_folder = "h5/fake_sim10k"
-    loader = Dataloader(h5_folder).build_loader(num_worker=0)
-    for idx, (boxes_label, cls_label, image_feature, instance_feature, cls_preds, boxes_preds) in enumerate(loader):
+    h5_folder = "h5/fake_sim10k_new"
+    loader = Dataloader(h5_folder).build_loader(num_worker=0, batch_size=1)
+    for idx, (boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, _) in enumerate(loader):
         print(idx)
 
 

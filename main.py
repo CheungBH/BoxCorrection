@@ -75,7 +75,7 @@ for epoch in range(epochs):
 
     for i, data in enumerate(loader):
         opt.iterations += 1
-        boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds = data
+        boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, _ = data
         if device != "cpu":
             output = net(image_feature.cuda(), instance_feature.cuda(), cls_preds.cuda(), boxes_preds.cuda()).cpu()
         else:
