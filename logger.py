@@ -59,7 +59,7 @@ class ErrorSummaryLogger:
     def __init__(self, folder):
         self.title = "image name, positive num, negative num, input loss, output loss, input-cls loss, " \
                      "output-cls loss, input-reg loss, output-reg loss, fg input-cls loss, fg output-cls loss, " \
-                     "bg input-cls loss, bg output-cls loss"
+                     "bg input-cls loss, bg output-cls loss\n"
         excel_path = os.path.join("/".join(folder.split("/")[:-1]), "error_summary.csv")
         if not os.path.exists(excel_path):
             self.file = open(excel_path, "w")
