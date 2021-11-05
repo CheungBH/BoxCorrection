@@ -32,7 +32,8 @@ loss_cls_after = torch.zeros(1)
 loss_reg_before = torch.zeros(1)
 loss_reg_after = torch.zeros(1)
 for i, data in enumerate(loader):
-    boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, image_name = data
+    boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, image_idx = data
+    image_name = loader.dataset.files[image_idx[0]].split("/")[-1]
     if device != "cpu":
         output = net(image_feature.cuda(), instance_feature.cuda(), cls_preds.cuda(), boxes_preds.cuda()).cpu()
     else:
@@ -51,9 +52,8 @@ for i, data in enumerate(loader):
     loss_reg_before += in_reg_loss
     loss_cls_before += in_cls_loss
 
-    # fg = torch.argmax(cls_label[0]).tolist()
-    errors.append([image_name[0], cls_label[0].tolist(), in_cls_loss.tolist(), in_reg_loss.tolist(),
-                   out_cls_loss.tolist(), out_reg_loss.tolist()])
+    errors.append([image_name, int(cls_label[0].tolist()), out_cls_loss.tolist(), out_reg_loss.tolist(),
+                   in_cls_loss.tolist(), in_reg_loss.tolist()])
 
 loss_logger = (loss_sum_before/len(loader), loss_sum_after.detach()/len(loader), loss_reg_before/len(loader),
                loss_reg_after/len(loader), loss_cls_before/len(loader), loss_cls_after/len(loader))

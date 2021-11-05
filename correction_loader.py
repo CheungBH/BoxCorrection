@@ -66,8 +66,7 @@ class CorrectionDataset(Dataset):
         if not return_name:
             return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds
         else:
-            return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, \
-                   self.files[idx].split("/")[-1]
+            return boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, idx
 
     def __len__(self):
         return len(self.idx)
