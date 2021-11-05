@@ -33,11 +33,16 @@ class ErrorAnalysisLogger:
         title = "image name, objectness, output cls-loss, output reg-loss, input cls-loss, input reg-loss\n"
         self.file.write(title)
 
-    def write_results(self, item):
-        im_name, fg, out_cls, out_reg, in_cls, in_reg = item
-        self.file.write("{},{},{},{},{},{}\n".format(im_name, fg, out_cls, out_reg, in_cls, in_reg))
+    # def write_results(self, item):
+    #     im_name, fg, out_cls, out_reg, in_cls, in_reg = item
+    #     self.file.write("{},{},{},{},{},{}\n".format(im_name, fg, out_cls, out_reg, in_cls, in_reg))
 
-    def write_summarize(self, ls):
+    def write_summarize(self, ls, loss=()):
         for item in ls:
-            self.write_results(item)
+            im_name, fg, out_cls, out_reg, in_cls, in_reg = item
+            self.file.write("{},{},{},{},{},{}\n".format(im_name, fg, out_cls, out_reg, in_cls, in_reg))
+        if loss:
+            self.file.write("\nLoss Before, {}".format(loss[0]))
+            self.file.write("\nLoss After, {}".format(loss[1]))
+
 

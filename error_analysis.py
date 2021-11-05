@@ -3,7 +3,6 @@ from correction_model import CorrectionNet
 from correction_loader import Dataloader
 import torch.nn.functional as F
 import torch
-import os
 from utils import generate_box_weight, _smooth_l1_loss
 import time
 from opt import opt
@@ -26,6 +25,8 @@ if device != "cpu":
 net.eval()
 errors = []
 
+loss_before = torch.zeros(1)
+loss_after = torch.zeros(1)
 for i, data in enumerate(loader):
     boxes_label, cls_label, image_feature, instance_feature, boxes_preds, cls_preds, image_name = data
     if device != "cpu":
@@ -39,7 +40,10 @@ for i, data in enumerate(loader):
     in_cls_loss = cls_crit(cls_preds, cls_label.long())
     in_reg_loss = _smooth_l1_loss(boxes_preds, boxes_label, b_weight, b_weight)
 
+    loss_after += out_reg_loss + out_cls_loss
+    loss_before += in_reg_loss + in_cls_loss
+
     # fg = torch.argmax(cls_label[0]).tolist()
     errors.append([image_name[0], cls_label[0].tolist(), in_cls_loss.tolist(), in_reg_loss.tolist(), out_cls_loss.tolist(), out_reg_loss.tolist()])
 
-logger.write_summarize(errors)
+logger.write_summarize(errors, (loss_before, loss_after))
