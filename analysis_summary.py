@@ -34,14 +34,15 @@ def analyse(df, name="all"):
 if __name__ == '__main__':
     csv_path = 'weights/error_analysis.csv'
     content = pd.read_csv(csv_path)
-    image_names = set(content["image name"].tolist())
-    anchor_per_img = int(len(content) / len(image_names))
-    image_boundaries = generate_boundary(anchor_per_img, len(image_names))
+    image_num = len(set(content["image name"].tolist()))
+    anchor_per_img = int(len(content) / image_num)
+    image_boundaries = generate_boundary(anchor_per_img, image_num)
 
     summary_ls = [analyse(content)]
 
-    for idx, img_name in enumerate(image_names):
-        summary_ls.append(analyse(content[image_boundaries[idx]: image_boundaries[idx + 1]], img_name))
+    for idx in range(image_num):
+        summary_ls.append(analyse(content[image_boundaries[idx]: image_boundaries[idx + 1]],
+                                  content["image name"][image_boundaries[idx]]))
 
     print(summary_ls)
     summary_logger = ErrorSummaryLogger(csv_path)
