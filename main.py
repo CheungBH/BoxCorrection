@@ -8,7 +8,7 @@ import os
 from utils import generate_box_weight, _smooth_l1_loss
 import time
 from opt import opt
-from logger import BatchLogger
+from logger import TrainBatchLogger
 from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR
 
 try:
@@ -61,7 +61,7 @@ if mix_precision:
 
 log = open(os.path.join(model_dir, "log.txt"), "w")
 best_loss = float("inf")
-batch_logger = BatchLogger(model_dir)
+batch_logger = TrainBatchLogger(model_dir)
 cfg_pkl = os.path.join(model_dir, "cfg.pkl")
 
 
@@ -116,4 +116,5 @@ for epoch in range(epochs):
     if epoch % opt.save_interval == 0:
         torch.save(net.state_dict(), os.path.join(model_dir, "{}.pth".format(epoch)))
 
-batch_logger.write_results(batch_size, optimize, LR, epochs, balance_ratio, schedule, momentum, best_loss)
+batch_logger.write_summarize([batch_logger.model_idx, batch_size, optimize, LR, epochs, balance_ratio, schedule,
+                              momentum, best_loss])

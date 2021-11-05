@@ -25,8 +25,6 @@ if device != "cpu":
 net.eval()
 errors = []
 
-loss_sum_before = torch.zeros(1)
-loss_sum_after = torch.zeros(1)
 loss_cls_before = torch.zeros(1)
 loss_cls_after = torch.zeros(1)
 loss_reg_before = torch.zeros(1)
@@ -45,8 +43,6 @@ for i, data in enumerate(loader):
     in_cls_loss = cls_crit(cls_preds, cls_label.long())
     in_reg_loss = _smooth_l1_loss(boxes_preds, boxes_label, b_weight, b_weight)
 
-    loss_sum_after += out_reg_loss + out_cls_loss
-    loss_sum_before += in_reg_loss + in_cls_loss
     loss_reg_after += out_reg_loss
     loss_cls_after += out_cls_loss
     loss_reg_before += in_reg_loss
@@ -55,6 +51,4 @@ for i, data in enumerate(loader):
     errors.append([image_name, int(cls_label[0].tolist()), out_cls_loss.tolist(), out_reg_loss.tolist(),
                    in_cls_loss.tolist(), in_reg_loss.tolist()])
 
-loss_logger = (loss_sum_before/len(loader), loss_sum_after.detach()/len(loader), loss_reg_before/len(loader),
-               loss_reg_after/len(loader), loss_cls_before/len(loader), loss_cls_after/len(loader))
-logger.write_summarize(errors, loss_logger)
+logger.write_summarize(errors)
