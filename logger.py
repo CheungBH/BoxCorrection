@@ -4,6 +4,7 @@ import os
 class BaseLogger:
     def __init__(self, folder):
         self.folder = folder
+        self.model_idx = self.folder.split("/")[-1]
         self.title = ""
 
     def init(self, kw):
@@ -13,7 +14,6 @@ class BaseLogger:
             self.write_title()
         else:
             self.file = open(excel_path, "a+")
-        self.model_idx = self.folder.split("/")[-1]
 
     @staticmethod
     def list2str(ls):
